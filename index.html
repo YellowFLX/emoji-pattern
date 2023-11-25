@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Noto+Emoji:wght@700&display=swap"
+            rel="stylesheet"
+        />
+        <script src="https://d3js.org/d3.v6.min.js"></script>
+        <title>Voronoi Diagram</title>
+        <style>
+            body {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                margin: 0;
+                /* font-family: "Noto Emoji"; */
+            }
+        </style>
+    </head>
+    <body>
+        <script>
+            //prettier-ignore
+            const emojiArray = [
+                "😄","😃","😀","😊","😉","😍","😘","😚","😗","😙","😜","😝","😛","😳","😁","😔","😌","😒","😞","😣","😢","😂","😭","😪","😥",
+                "😰","😅","😓","😩","😫","😨","😱","😠","😡","😤","😖","😆","😋","😷","😎","😴","😵","😲","😟","😦","😧","😈","👿","😮","😬",
+                "😐","😕","😯","😶","😇","😏","😑","👲","👳","👮","👷","💂","👶","👦","👧","👨","👩","👴","👵","👱","👼","👸","😺","😸","😻",
+                "😽","😼","🙀","😿","😹","😾","👹","👺","🙈","🙉","🙊","💀","👽","💩","🔥","✨","🌟","💫","💥","💢","💦","💧","💤","💨","👂",
+                "👀","👃","👅","👄","👍","👎","👌","👊","✊","✌","👋","✋","👐","👆","👇","👉","👈","🙌","🙏","☝","👏","💪","🚶","🏃","💃",
+                "👫","👪","👬","👭","💏","💑","👯","🙆","🙅","💁","🙋","💆","💇","💅","👰","🙎","🙍","🙇","🎩","👑","👒","👟","👞","👡","👠",
+                "👢","👕","👔","👚","👗","🎽","👖","👘","👙","💼","👜","👝","👛","👓","🎀","🌂","💄","💛","💙","💜","💚","💔","💗","💓","💕",
+                "💖","💞","💘","💌","💋","💍","💎","👤","👥","💬","👣","💭","🐶","🐺","🐱","🐭","🐹","🐰","🐸","🐯","🐨","🐻","🐷","🐽","🐮",
+                "🐗","🐵","🐒","🐴","🐑","🐘","🐼","🐧","🐦","🐤","🐥","🐣","🐔","🐍","🐢","🐛","🐝","🐜","🐞","🐌","🐙","🐚","🐠","🐟","🐬",
+                "🐳","🐋","🐄","🐏","🐀","🐃","🐅","🐇","🐉","🐎","🐐","🐓","🐕","🐖","🐁","🐂","🐲","🐡","🐊","🐫","🐪","🐆","🐈","🐩","🐾",
+                "💐","🌸","🌷","🍀","🌹","🌻","🌺","🍁","🍃","🍂","🌿","🌾","🍄","🌵","🌴","🌲","🌳","🌰","🌱","🌼","🌐","🌞","🌝","🌚","🌑",
+                "🌒","🌓","🌔","🌕","🌖","🌗","🌘","🌜","🌛","🌙","🌍","🌎","🌏","🌋","🌌","🌠","⭐","⛅","⚡","☔","⛄","🌀","🌁","🌈","🌊",
+                "🎍","💝","🎎","🎒","🎓","🎏","🎆","🎇","🎐","🎑","🎃","👻","🎅","🎄","🎁","🎋","🎉","🎊","🎈","🎌","🔮","🎥","📷","📹","📼",
+                "💿","📀","💽","💾","💻","📱","📞","📟","📠","📡","📺","📻","🔊","🔉","🔈","🔇","🔔","🔕","📢","📣","⏳","⌛","⏰","⌚","🔓",
+                "🔒","🔏","🔐","🔑","🔎","💡","🔦","🔆","🔅","🔌","🔋","🔍","🛁","🛀","🚿","🚽","🔧","🔩","🔨","🚪","🚬","💣","🔫","🔪","💊",
+                "💉","💰","💴","💵","💷","💶","💳","💸","📲","📧","📥","📤","📩","📨","📯","📫","📪","📬","📭","📮","📦","📝","📄","📃","📑",
+                "📊","📈","📉","📜","📋","📅","📆","📇","📁","📂","📌","📎","📏","📐","📕","📗","📘","📙","📓","📔","📒","📚","📖","🔖","📛",
+                "🔬","🔭","📰","🎨","🎬","🎤","🎧","🎼","🎵","🎶","🎹","🎻","🎺","🎷","🎸","👾","🎮","🃏","🎴","🀄","🎲","🎯","🏈","🏀","⚽",
+                "⚾","🎾","🎱","🏉","🎳","⛳","🚵","🚴","🏁","🏇","🏆","🎿","🏂","🏊","🏄","🎣","☕","🍵","🍶","🍼","🍺","🍻","🍸","🍹","🍷",
+                "🍴","🍕","🍔","🍟","🍗","🍖","🍝","🍛","🍤","🍱","🍣","🍥","🍙","🍘","🍚","🍜","🍲","🍢","🍡","🍳","🍞","🍩","🍮","🍦","🍨",
+                "🍧","🎂","🍰","🍪","🍫","🍬","🍭","🍯","🍎","🍏","🍊","🍋","🍒","🍇","🍉","🍓","🍑","🍈","🍌","🍐","🍍","🍠","🍆","🍅","🌽",
+                "🏠","🏡","🏫","🏢","🏣","🏥","🏦","🏪","🏩","🏨","💒","⛪","🏬","🏤","🌇","🌆","🏯","🏰","⛺","🏭","🗼","🗾","🗻","🌄","🌅",
+                "🌃","🗽","🌉","🎠","🎡","⛲","🎢","🚢","⛵","🚤","🚣","⚓","🚀","💺","🚁","🚂","🚊","🚉","🚞","🚆","🚄","🚅","🚈","🚇","🚝",
+                "🚋","🚃","🚎","🚌","🚍","🚙","🚘","🚗","🚕","🚖","🚛","🚚","🚨","🚓","🚔","🚒","🚑","🚐","🚲","🚡","🚟","🚠","🚜","💈","🚏",
+                "🎫","🚦","🚧","🔰","⛽","🏮","🎰","🗿","🎪","🎭","📍","🚩","🔠","🔡","🔤","🔄","🔼","🔽","⏪","⏩","⏫","⏬","🆗","🔀","🔁",
+                "🔂","🆕","🆙","🆒","🆓","🆖","📶","🎦","🈁","🈯","🈳","🈵","🈴","🈲","🉐","🈹","🈺","🈶","🈚","🚻","🚹","🚺","🚼","🚾","🚰",
+                "🚮","🅿","♿","🚭","🈸","🛂","🛄","🛅","🛃","🉑","🆑","🆘","🆔","🚫","🔞","📵","🚯","🚱","🚳","🚷","🚸","⛔","❎","✅","💟",
+                "🆚","📳","📴","🅰","🅱","🆎","🅾","💠","➿","♈","♉","♊","♋","♌","♍","♎","♏","♐","♑","♒","♓","⛎","🔯","🏧","💹",
+                "💲","💱","🔝","🔚","🔙","🔛","🔜","❌","⭕","❗","❓","🔃","🕑","🕒","🕓","➕","➖","➗","💮","💯","🔘","🔗","➰","🔱",
+            ];
+
+            const getShuffledArr = (arr) => {
+                const newArr = arr.slice();
+                for (let i = newArr.length - 1; i > 0; i--) {
+                    const rand = Math.floor(Math.random() * (i + 1));
+                    [newArr[i], newArr[rand]] = [newArr[rand], newArr[i]];
+                }
+                return newArr;
+            };
+            const drawPattern = (
+                numPoints = 30,
+                sizee = 300,
+                name = "pattern",
+                emojiss = emojiArray
+            ) => {
+                let emojis = getShuffledArr(emojiss);
+                let size = sizee / 3;
+                const points = [];
+                for (let i = 0; i < numPoints; i++) {
+                    points.push({
+                        x: Math.random() * size,
+                        y: Math.random() * size,
+                    });
+                }
+
+                const delaunay = d3.Delaunay.from(
+                    points.map((d) => [d.x, d.y])
+                );
+                const voronoi = delaunay.voronoi([0, 0, size, size]);
+
+                const centers = [];
+                for (let cell of voronoi.cellPolygons()) {
+                    const center = d3.polygonCentroid(cell);
+                    const l = Math.sqrt(
+                        Math.abs(d3.polygonArea(cell)) / Math.PI
+                    ).toFixed(2);
+                    const o = {
+                        x: Number(center[0].toFixed(2)),
+                        y: Number(center[1].toFixed(2)),
+                        l,
+                    };
+                    centers.push(o);
+                }
+
+                const svg = d3
+                    .select("body")
+                    .append("svg")
+                    .attr("width", size * 3)
+                    .attr("height", size * 3);
+
+                const drawIcon = (x, y, s, emoji, rotate) => {
+                    svg.data([{ x, y }])
+                        .append("text")
+                        .attr("text-anchor", "middle")
+                        .attr("dominant-baseline", "middle")
+                        .attr("transform", `rotate(${rotate} ${x} ${y})`)
+                        .attr("x", (d) => d.x)
+                        .attr("y", (d) => d.y)
+                        .text(emoji)
+                        .attr("font-size", s + "px")
+                        .attr("opacity", "0.5");
+                };
+
+                for (let i = 0; i < centers.length; i++) {
+                    const element = centers[i];
+                    const n = Math.floor(Math.random() * emojis.length);
+                    const emoji = emojis[n];
+                    emojis = emojis.filter((e) => e !== emoji);
+
+                    const rotate = Math.floor(Math.random() * 90) - 45;
+
+                    drawIcon(
+                        element.x,
+                        element.y + size,
+                        element.l,
+                        emoji,
+                        rotate
+                    );
+                    drawIcon(
+                        element.x + size,
+                        element.y,
+                        element.l,
+                        emoji,
+                        rotate
+                    );
+                    drawIcon(
+                        element.x + size,
+                        element.y + size,
+                        element.l,
+                        emoji,
+                        rotate
+                    );
+                    drawIcon(
+                        element.x + size,
+                        element.y + size * 2,
+                        element.l,
+                        emoji,
+                        rotate
+                    );
+                    drawIcon(
+                        element.x + size * 2,
+                        element.y + size,
+                        element.l,
+                        emoji,
+                        rotate
+                    );
+                }
+
+                svg.attr("viewBox", `${size} ${size} ${size} ${size}`);
+                svg.attr("id", name);
+                svg.attr("style", "font-family: Noto Emoji");
+            };
+
+            const svgSlice = (name = "pattern") => {
+                const svg = document.getElementById(name);
+
+                const viewBox = svg
+                    .getAttribute("viewBox")
+                    .split(" ")
+                    .map(Number);
+                const elements = [...svg.getElementsByTagName("*")];
+
+                elements.forEach((element) => {
+                    const bbox = element.getBBox();
+
+                    if (
+                        bbox.x + bbox.width < viewBox[0] ||
+                        bbox.y + bbox.height < viewBox[1] ||
+                        bbox.x > viewBox[0] + viewBox[2] ||
+                        bbox.y > viewBox[1] + viewBox[3]
+                    ) {
+                        element.parentNode.removeChild(element);
+                    }
+                });
+            };
+
+            const reDraw = (name = "pattern") => {
+                const svg = document.getElementById(name);
+
+                if (svg) {
+                    svg.remove();
+                }
+
+                document.body.style.backgroundImage = "";
+
+                r = document.getElementById("repeatCheckbox").checked;
+                n = Number(document.getElementById("numPointsInput").value);
+                s = Number(document.getElementById("sizeInput").value);
+
+                drawPattern(n, s, name, emojiArray);
+                svgSlice(name);
+
+                if (r) {
+                    repeat();
+                }
+            };
+
+            const controls = (n, s, name = "pattern") => {
+                const wrapper = document.createElement("div");
+                wrapper.id = "controls";
+                wrapper.style.height = "2vh";
+                document.body.prepend(wrapper);
+
+                const saveButton = document.createElement("button");
+                saveButton.innerText = "Download";
+                wrapper.prepend(saveButton);
+
+                saveButton.addEventListener("click", () => {
+                    const svg = document.getElementById(name);
+                    const vis = svg.style.visibility;
+                    svg.style.visibility = "visible";
+                    const svgString = new XMLSerializer().serializeToString(
+                        svg
+                    );
+                    const svgBlob = new Blob([svgString], {
+                        type: "image/svg+xml",
+                    });
+                    const svgUrl = URL.createObjectURL(svgBlob);
+                    const downloadLink = document.createElement("a");
+
+                    downloadLink.href = svgUrl;
+                    downloadLink.download = `${name}.svg`;
+
+                    document.body.appendChild(downloadLink);
+                    downloadLink.click();
+                    document.body.removeChild(downloadLink);
+                    svg.style.visibility = vis;
+                });
+
+                const reDrawButton = document.createElement("button");
+                reDrawButton.innerText = "Generate";
+                wrapper.prepend(reDrawButton);
+
+                reDrawButton.addEventListener("click", () => reDraw(name));
+
+                // Size of pattern input
+                const sizeInput = document.createElement("input");
+                sizeInput.id = "sizeInput";
+                sizeInput.type = "number";
+                sizeInput.value = s;
+                sizeInput.min = 100;
+                sizeInput.style.width = "50px";
+                wrapper.prepend(sizeInput);
+
+                // Number of points input
+                const numPointsInput = document.createElement("input");
+                numPointsInput.id = "numPointsInput";
+                numPointsInput.type = "number";
+                numPointsInput.value = n;
+                numPointsInput.min = 1;
+                numPointsInput.style.width = "50px";
+                wrapper.prepend(numPointsInput);
+
+                // checkbox for repeating pattern
+                const repeatCheckbox = document.createElement("input");
+                repeatCheckbox.id = "repeatCheckbox";
+                repeatCheckbox.type = "checkbox";
+                repeatCheckbox.addEventListener("change", () => {
+                    reDraw(name);
+                });
+                wrapper.prepend(repeatCheckbox);
+                const labelC = document.createElement("label");
+                labelC.innerText = "Background";
+                labelC.htmlFor = "repeatCheckbox";
+                wrapper.prepend(labelC);
+            };
+
+            const repeat = (name = "pattern") => {
+                const svg = document.getElementById(name);
+                const svgString = new XMLSerializer().serializeToString(svg);
+                document.body.style.backgroundImage = `url("data:image/svg+xml;base64,${utf8_to_b64(
+                    svgString
+                )}")`;
+                document.body.style.backgroundRepeat = "repeat";
+                svg.style.visibility = "hidden";
+            };
+
+            function utf8_to_b64(str) {
+                return window.btoa(unescape(encodeURIComponent(str)));
+            }
+
+            const init = () => {
+                const name = "pattern";
+                const numPoints = 30;
+
+                const height = window.innerHeight - 50;
+                const width = window.innerWidth;
+
+                const size = 300;
+                controls(numPoints, size, name);
+
+                drawPattern(numPoints, size, name, emojiArray);
+                svgSlice();
+            };
+
+            init();
+        </script>
+    </body>
+</html>
